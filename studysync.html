@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudySync – Study Together, Grow Together</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+:root {
+  --green: #2E7D32;
+  --green-light: #43A047;
+  --green-pale: #E8F5E9;
+  --green-mid: #C8E6C9;
+  --blue: #1976D2;
+  --blue-pale: #E3F2FD;
+  --red: #C62828;
+  --red-pale: #FFEBEE;
+  --orange: #E65100;
+  --yellow: #F9A825;
+  --bg: #F4F6F8;
+  --surface: #FFFFFF;
+  --surface2: #F0F4F8;
+  --border: #E0E7EF;
+  --text: #1A2332;
+  --text-mid: #4A5568;
+  --text-light: #8A9BB0;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --nav-w: 230px;
+  --transition: 0.2s ease;
+}
+[data-theme="dark"] {
+  --bg: #0F1621;
+  --surface: #1A2332;
+  --surface2: #222E40;
+  --border: #2C3E55;
+  --text: #E8EDF4;
+  --text-mid: #A8B8CC;
+  --text-light: #5A7090;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --green-pale: #1B3320;
+  --green-mid: #2A4A2E;
+  --blue-pale: #0D2645;
+  --red-pale: #3A1010;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; transition: background 0.3s, color 0.3s; }
+
+/* Skip link */
+.skip-link { position: absolute; top: -100px; left: 8px; background: var(--green); color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); z-index: 9999; font-weight: 600; transition: top 0.2s; }
+.skip-link:focus { top: 8px; }
+
+/* Focus ring */
+*:focus-visible { outline: 3px solid #1976D2; outline-offset: 2px; border-radius: 4px; }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: flex; }
+
+/* ===== AUTH PAGE ===== */
+#page-auth { min-height: 100vh; align-items: center; justify-content: center; background: linear-gradient(135deg, #0A3622 0%, #1B5E20 50%, #1565C0 100%); padding: 20px; }
+.auth-card { background: var(--surface); border-radius: 20px; width: 100%; max-width: 480px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.auth-logo { background: linear-gradient(135deg, #2E7D32, #1976D2); padding: 32px; text-align: center; }
+.auth-logo h1 { font-family: var(--font-display); color: #fff; font-size: 2rem; letter-spacing: -0.5px; }
+.auth-logo p { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 4px; }
+.auth-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.auth-tab { flex: 1; padding: 14px; background: none; border: none; cursor: pointer; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; color: var(--text-mid); transition: all var(--transition); }
+.auth-tab.active { color: var(--green); border-bottom: 3px solid var(--green); margin-bottom: -1px; }
+.auth-body { padding: 28px; }
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select { padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.95rem; background: var(--bg); color: var(--text); transition: border-color var(--transition); }
+.form-group input:focus, .form-group select:focus { border-color: var(--green); outline: none; }
+.form-group input.error { border-color: var(--red); }
+.form-error { color: var(--red); font-size: 0.8rem; display: none; }
+.form-error.show { display: block; }
+.password-wrap { position: relative; }
+.password-wrap input { width: 100%; padding-right: 42px; }
+.password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-light); font-size: 1rem; }
+.availability-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.avail-check { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--text-mid); cursor: pointer; }
+.avail-check input[type=checkbox] { accent-color: var(--green); width: 16px; height: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--green); color: #fff; }
+.btn-primary:hover { background: var(--green-light); }
+.btn-secondary { background: var(--surface2); color: var(--text); }
+.btn-secondary:hover { background: var(--border); }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-red { background: var(--red); color: #fff; }
+.btn-red:hover { background: #B71C1C; }
+.btn-outline { background: transparent; color: var(--green); border: 2px solid var(--green); }
+.btn-sm { padding: 7px 14px; font-size: 0.85rem; }
+.btn-full { width: 100%; }
+.demo-hint { margin-top: 16px; padding: 12px 14px; background: var(--green-pale); border-radius: var(--radius-sm); font-size: 0.82rem; color: var(--green); border-left: 3px solid var(--green); }
+
+/* ===== APP SHELL ===== */
+#page-app { min-height: 100vh; flex-direction: row; }
+.sidebar { width: var(--nav-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s; }
+.sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-logo h2 { font-family: var(--font-display); font-size: 1.3rem; color: var(--green); }
+.sidebar-logo span { font-size: 0.75rem; color: var(--text-light); }
+.nav-menu { flex: 1; padding: 12px 8px; overflow-y: auto; }
+.nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text-mid); font-weight: 500; transition: all var(--transition); margin-bottom: 2px; border: none; background: none; font-family: var(--font-body); font-size: 0.92rem; width: 100%; text-align: left; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--green-pale); color: var(--green); font-weight: 700; }
+.nav-item i { width: 18px; text-align: center; font-size: 0.95rem; }
+.nav-badge { margin-left: auto; background: var(--red); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; font-weight: 700; }
+.sidebar-bottom { padding: 12px 8px; border-top: 1px solid var(--border); }
+.user-chip { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-sm); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--blue)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+.user-chip-info { flex: 1; min-width: 0; }
+.user-chip-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-chip-role { font-size: 0.72rem; color: var(--text-light); }
+.main-content { margin-left: var(--nav-w); flex: 1; min-height: 100vh; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.topbar-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-mid); transition: all var(--transition); }
+.icon-btn:hover { background: var(--border); color: var(--text); }
+.content-area { padding: 24px; }
+
+/* Sub-pages */
+.sub-page { display: none; }
+.sub-page.active { display: block; }
+
+/* ===== DASHBOARD ===== */
+.welcome-banner { background: linear-gradient(135deg, #1B5E20 0%, #1565C0 100%); border-radius: var(--radius); padding: 24px 28px; color: #fff; margin-bottom: 20px; position: relative; overflow: hidden; }
+.welcome-banner::before { content: ''; position: absolute; right: -30px; top: -30px; width: 160px; height: 160px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+.welcome-banner h2 { font-family: var(--font-display); font-size: 1.6rem; }
+.welcome-banner p { opacity: 0.85; margin-top: 4px; font-size: 0.9rem; }
+.welcome-meta { display: flex; gap: 20px; margin-top: 16px; }
+.welcome-stat { display: flex; flex-direction: column; }
+.welcome-stat .val { font-size: 1.4rem; font-weight: 700; font-family: var(--font-display); }
+.welcome-stat .lbl { font-size: 0.75rem; opacity: 0.8; }
+
+.dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; border: 1px solid var(--border); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-weight: 700; font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-mid); display: flex; align-items: center; gap: 8px; }
+.card-title i { color: var(--green); }
+.card-badge { background: var(--green-pale); color: var(--green); border-radius: 12px; padding: 2px 10px; font-size: 0.78rem; font-weight: 700; }
+
+/* Members / online dots */
+.member-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.member-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border-radius: 20px; padding: 4px 10px 4px 4px; font-size: 0.82rem; }
+.online-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CAF50; box-shadow: 0 0 4px #4CAF50; }
+.offline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-light); }
+.streak-display { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.streak-fire { font-size: 1.4rem; }
+.streak-count { font-size: 1.5rem; font-weight: 800; font-family: var(--font-display); color: var(--orange); }
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Pomodoro */
+.pomodoro-display { text-align: center; padding: 10px 0; }
+.pomodoro-time { font-size: 3.5rem; font-weight: 800; font-family: var(--font-display); color: var(--green); letter-spacing: -2px; }
+.pomodoro-label { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
+.pomodoro-controls { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+.pomodoro-progress { width: 100%; height: 4px; background: var(--border); border-radius: 4px; margin-top: 14px; }
+.pomodoro-bar { height: 4px; background: var(--green); border-radius: 4px; width: 0%; transition: width 1s linear; }
+.studying-label { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 8px; }
+
+/* Sessions */
+.session-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.session-item:last-child { border-bottom: none; }
+.session-time-badge { background: var(--blue-pale); color: var(--blue); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+.session-info { flex: 1; }
+.session-name { font-weight: 600; font-size: 0.9rem; }
+.session-sub { font-size: 0.78rem; color: var(--text-light); }
+
+/* Task Tracker */
+.task-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); cursor: grab; }
+.task-item:last-child { border-bottom: none; }
+.task-item input[type=checkbox] { accent-color: var(--green); width: 16px; height: 16px; flex-shrink: 0; }
+.task-text { flex: 1; font-size: 0.9rem; }
+.task-text.done { text-decoration: line-through; color: var(--text-light); }
+.task-assignee { font-size: 0.75rem; color: var(--text-light); background: var(--surface2); border-radius: 12px; padding: 2px 8px; }
+.task-react { background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0.5; transition: opacity var(--transition); }
+.task-react:hover { opacity: 1; }
+.task-add { display: flex; gap: 8px; margin-top: 12px; }
+.task-add input { flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.88rem; background: var(--bg); color: var(--text); }
+
+/* Chat preview */
+.chat-msg { padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 0.87rem; }
+.chat-msg:last-child { border-bottom: none; }
+.chat-msg-author { font-weight: 700; color: var(--green); font-size: 0.8rem; }
+.chat-msg-text { margin-top: 2px; }
+
+/* Progress */
+.progress-bar-wrap { margin-bottom: 12px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-mid); margin-bottom: 6px; }
+.progress-track { height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 10px; background: linear-gradient(90deg, var(--green), var(--green-light)); border-radius: 10px; transition: width 0.8s ease; }
+.badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.badge { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.72rem; color: var(--text-mid); border: 1px solid var(--border); }
+.badge i { font-size: 1.3rem; }
+.badge.earned i { color: var(--yellow); }
+.badge.earned { border-color: var(--yellow); background: #FFF8E1; }
+[data-theme="dark"] .badge.earned { background: #2C2100; }
+
+/* ===== GROUP DISCOVERY ===== */
+.filters-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+.filters-bar select { padding: 9px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.88rem; background: var(--bg); color: var(--text); }
+.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.group-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; transition: all var(--transition); }
+.group-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.group-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.group-name { font-weight: 700; font-size: 1rem; }
+.match-badge { background: var(--green-pale); color: var(--green); border-radius: 12px; padding: 3px 10px; font-size: 0.8rem; font-weight: 700; }
+.group-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.tag { background: var(--surface2); color: var(--text-mid); border-radius: 12px; padding: 3px 10px; font-size: 0.78rem; border: 1px solid var(--border); }
+.group-members { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 0.85rem; color: var(--text-mid); }
+.avatar-stack { display: flex; }
+.avatar-stack .avatar { width: 26px; height: 26px; font-size: 0.65rem; margin-left: -6px; border: 2px solid var(--surface); }
+.avatar-stack .avatar:first-child { margin-left: 0; }
+
+/* ===== CHAT PAGE ===== */
+.chat-layout { display: grid; grid-template-columns: 220px 1fr; gap: 0; height: calc(100vh - 65px); }
+.chat-sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; }
+.chat-sidebar h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light); margin-bottom: 10px; }
+.chat-room-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.9rem; transition: background var(--transition); }
+.chat-room-item:hover, .chat-room-item.active { background: var(--green-pale); color: var(--green); }
+.chat-room-item .dot { width: 8px; height: 8px; border-radius: 50%; }
+.chat-main { display: flex; flex-direction: column; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.chat-bubble { display: flex; gap: 10px; max-width: 75%; }
+.chat-bubble.mine { align-self: flex-end; flex-direction: row-reverse; }
+.chat-bubble .avatar { flex-shrink: 0; width: 32px; height: 32px; font-size: 0.75rem; }
+.bubble-content { background: var(--surface2); border-radius: 14px 14px 14px 4px; padding: 10px 14px; }
+.chat-bubble.mine .bubble-content { background: var(--green); color: #fff; border-radius: 14px 14px 4px 14px; }
+.bubble-author { font-size: 0.75rem; font-weight: 700; color: var(--text-light); margin-bottom: 3px; }
+.chat-bubble.mine .bubble-author { color: rgba(255,255,255,0.7); }
+.mention { color: var(--blue); font-weight: 700; }
+.chat-bubble.mine .mention { color: #90CAF9; }
+.shoutout-bubble { background: linear-gradient(135deg, #FFF8E1, #FFF3E0); border: 2px solid var(--yellow); border-radius: var(--radius); padding: 12px 16px; font-size: 0.88rem; align-self: center; text-align: center; max-width: 90%; }
+[data-theme="dark"] .shoutout-bubble { background: linear-gradient(135deg, #2C1E00, #3E2700); }
+.shoutout-bubble .so-title { font-weight: 700; color: var(--orange); margin-bottom: 4px; }
+.chat-input-area { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--surface); }
+.chat-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.chat-input-wrap { flex: 1; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 22px; display: flex; align-items: center; padding: 0 14px; }
+.chat-input-wrap input { flex: 1; border: none; background: none; font-family: var(--font-body); font-size: 0.92rem; color: var(--text); padding: 10px 0; outline: none; }
+.emoji-bar { display: flex; gap: 4px; padding-right: 8px; }
+.emoji-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px; border-radius: 4px; transition: transform var(--transition); }
+.emoji-btn:hover { transform: scale(1.3); }
+.send-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--green); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all var(--transition); }
+.send-btn:hover { background: var(--green-light); transform: scale(1.05); }
+
+/* ===== CALENDAR ===== */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-week { display: grid; grid-template-columns: 60px repeat(7, 1fr); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.cal-day-head { background: var(--surface2); padding: 10px 4px; text-align: center; font-size: 0.8rem; font-weight: 700; border-left: 1px solid var(--border); }
+.cal-day-head:first-child { border-left: none; }
+.cal-time-label { font-size: 0.72rem; color: var(--text-light); padding: 0 6px; height: 40px; display: flex; align-items: center; justify-content: flex-end; border-bottom: 1px solid var(--border); }
+.cal-cell { border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); height: 40px; cursor: pointer; transition: background var(--transition); position: relative; }
+.cal-cell:hover { background: var(--green-pale); }
+.cal-event { position: absolute; inset: 2px; background: var(--green); border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; color: #fff; overflow: hidden; cursor: pointer; z-index: 2; }
+.cal-event.video { background: var(--blue); }
+.cal-event.inperson { background: var(--orange); }
+
+/* ===== PROFILE ===== */
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.profile-header-card { grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; }
+.avatar-lg { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--blue)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 1.6rem; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-weight: 500; font-size: 0.92rem; }
+.toggle-sub { font-size: 0.78rem; color: var(--text-light); }
+.toggle-switch { position: relative; width: 44px; height: 24px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 24px; cursor: pointer; transition: background var(--transition); }
+.toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform var(--transition); }
+.toggle-switch input:checked + .toggle-slider { background: var(--green); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* ===== MODALS ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius); max-width: 500px; width: 100%; box-shadow: var(--shadow-lg); animation: modalIn 0.25s ease; }
+@keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-header { padding: 20px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-family: var(--font-display); font-size: 1.2rem; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--text-light); padding: 4px; border-radius: 4px; }
+.modal-body { padding: 20px 22px; }
+.modal-footer { padding: 14px 22px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); }
+
+/* ===== TOASTS ===== */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); pointer-events: all; animation: toastIn 0.3s ease; min-width: 260px; }
+@keyframes toastIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast.success { background: #2E7D32; color: #fff; }
+.toast.error { background: var(--red); color: #fff; }
+.toast.info { background: var(--blue); color: #fff; }
+.toast.warning { background: var(--orange); color: #fff; }
+
+/* ===== STUDYBOT ===== */
+.studybot-fab { position: fixed; bottom: 24px; left: 24px; z-index: 500; }
+.studybot-btn { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--blue)); border: none; color: #fff; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 16px rgba(46,125,50,0.4); transition: all var(--transition); }
+.studybot-btn:hover { transform: scale(1.1); }
+.studybot-panel { position: fixed; bottom: 86px; left: 24px; width: 320px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); z-index: 500; display: none; }
+.studybot-panel.open { display: block; animation: modalIn 0.2s ease; }
+.studybot-header { padding: 14px 16px; background: linear-gradient(135deg, var(--green), var(--blue)); border-radius: var(--radius) var(--radius) 0 0; color: #fff; display: flex; align-items: center; gap: 10px; }
+.studybot-header h4 { font-weight: 700; font-size: 0.95rem; }
+.studybot-messages { height: 220px; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.bot-msg { background: var(--surface2); border-radius: 12px 12px 12px 4px; padding: 8px 12px; font-size: 0.85rem; max-width: 85%; }
+.user-msg { background: var(--green); color: #fff; border-radius: 12px 12px 4px 12px; padding: 8px 12px; font-size: 0.85rem; align-self: flex-end; max-width: 85%; }
+.studybot-input { display: flex; border-top: 1px solid var(--border); }
+.studybot-input input { flex: 1; border: none; padding: 10px 14px; font-family: var(--font-body); font-size: 0.88rem; background: transparent; color: var(--text); outline: none; border-radius: 0 0 0 var(--radius); }
+.studybot-input button { padding: 10px 14px; background: var(--green); border: none; color: #fff; cursor: pointer; border-radius: 0 0 var(--radius) 0; font-size: 0.9rem; }
+
+/* ===== LEADERBOARD ===== */
+.leaderboard-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-mid); }
+.leaderboard { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+.leaderboard.show { display: block; }
+.lb-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { width: 24px; font-weight: 800; font-family: var(--font-display); color: var(--text-light); text-align: center; }
+.lb-rank.gold { color: #F9A825; }
+.lb-rank.silver { color: #90A4AE; }
+.lb-rank.bronze { color: #A1887F; }
+.lb-hrs { margin-left: auto; font-weight: 700; color: var(--green); font-size: 0.9rem; }
+
+/* Missed session banner */
+.missed-banner { background: linear-gradient(135deg, #FFF3E0, #FFF8E1); border: 1px solid #FFB74D; border-radius: var(--radius); padding: 14px 18px; margin-bottom: 18px; display: none; }
+[data-theme="dark"] .missed-banner { background: linear-gradient(135deg, #2C1800, #2E2000); border-color: #7A4500; }
+.missed-banner.show { display: flex; align-items: flex-start; gap: 14px; }
+.missed-banner i { color: var(--orange); font-size: 1.3rem; margin-top: 2px; }
+.missed-banner p { font-size: 0.88rem; color: var(--text); }
+.missed-banner strong { color: var(--orange); }
+
+/* Loading spinner */
+.spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 20px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Tooltip */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1A2332; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 100; }
+[data-tooltip]:hover::after { opacity: 1; }
+
+/* Session complete modal special */
+.session-complete-emoji { font-size: 3rem; text-align: center; margin-bottom: 12px; }
+.session-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+.session-stat { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.session-stat .val { font-size: 1.5rem; font-weight: 800; font-family: var(--font-display); color: var(--green); }
+.session-stat .lbl { font-size: 0.78rem; color: var(--text-light); margin-top: 2px; }
+
+/* DND banner */
+.dnd-banner { background: var(--red-pale); border: 1px solid var(--red); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.85rem; color: var(--red); display: none; align-items: center; gap: 8px; margin-bottom: 12px; }
+.dnd-banner.show { display: flex; }
+
+/* Privacy policy */
+.privacy-content { max-height: 300px; overflow-y: auto; font-size: 0.85rem; line-height: 1.7; color: var(--text-mid); }
+.privacy-content h4 { color: var(--text); font-size: 0.92rem; margin: 12px 0 6px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .chat-layout { grid-template-columns: 1fr; }
+  .chat-sidebar { display: none; }
+}
+@media (max-width: 640px) {
+  :root { --nav-w: 0px; }
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.mobile-open { transform: translateX(0); width: 220px; }
+  .main-content { margin-left: 0; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .cal-week { grid-template-columns: 45px repeat(7, 1fr); font-size: 0.7rem; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ======================================================
+     PAGE 1: AUTH
+====================================================== -->
+<div id="page-auth" class="page active" role="main">
+  <div class="auth-card" role="region" aria-label="Authentication">
+    <div class="auth-logo">
+      <h1><i class="fa-solid fa-book-open-reader" aria-hidden="true"></i> StudySync</h1>
+      <p>Study together, grow together</p>
+    </div>
+    <div class="auth-tabs" role="tablist" aria-label="Login or Sign Up">
+      <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div class="auth-body">
+      <!-- LOGIN -->
+      <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <div class="auth-form">
+          <div class="form-group">
+            <label for="login-email">University Email</label>
+            <input type="email" id="login-email" placeholder="you@university.edu" autocomplete="email" aria-required="true">
+            <span class="form-error" id="login-email-err" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="login-pass">Password</label>
+            <div class="password-wrap">
+              <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" aria-required="true">
+              <button class="password-toggle" onclick="togglePassword('login-pass', this)" aria-label="Show password" title="Show/hide password">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <span class="form-error" id="login-pass-err" role="alert"></span>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="doLogin()" aria-label="Log in to StudySync">
+            <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Log In
+          </button>
+        </div>
+        <div class="demo-hint" role="note">
+          <strong><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Demo accounts:</strong><br>
+          demo1@university.edu / demo2@university.edu / demo3@university.edu<br>
+          <em>Any password works for demo accounts</em>
+        </div>
+      </div>
+      <!-- SIGNUP -->
+      <div id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" style="display:none">
+        <div class="auth-form">
+          <div class="form-group">
+            <label for="su-name">Full Name</label>
+            <input type="text" id="su-name" placeholder="Alex Johnson" autocomplete="name" aria-required="true">
+            <span class="form-error" id="su-name-err" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="su-email">University Email</label>
+            <input type="email" id="su-email" placeholder="you@university.edu" autocomplete="email" aria-required="true">
+            <span class="form-error" id="su-email-err" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="su-course">Course / Programme</label>
+            <input type="text" id="su-course" placeholder="e.g. Computer Science" aria-required="true">
+          </div>
+          <div class="form-group">
+            <label>Weekly Availability</label>
+            <div class="availability-grid" role="group" aria-label="Select your available days">
+              <label class="avail-check"><input type="checkbox" value="Mon" aria-label="Monday"> Mon</label>
+              <label class="avail-check"><input type="checkbox" value="Tue" aria-label="Tuesday"> Tue</label>
+              <label class="avail-check"><input type="checkbox" value="Wed" aria-label="Wednesday"> Wed</label>
+              <label class="avail-check"><input type="checkbox" value="Thu" aria-label="Thursday"> Thu</label>
+              <label class="avail-check"><input type="checkbox" value="Fri" aria-label="Friday"> Fri</label>
+              <label class="avail-check"><input type="checkbox" value="Sat" aria-label="Saturday"> Sat</label>
+              <label class="avail-check"><input type="checkbox" value="Sun" aria-label="Sunday"> Sun</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="su-method">Preferred Study Method</label>
+            <select id="su-method" aria-required="true">
+              <option value="">Select a method...</option>
+              <option value="Pomodoro">🍅 Pomodoro Technique</option>
+              <option value="Active Recall">🧠 Active Recall</option>
+              <option value="Flashcards">📇 Flashcards</option>
+              <option value="Revision Quizzes">✏️ Revision Quizzes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="su-pass">Password</label>
+            <div class="password-wrap">
+              <input type="password" id="su-pass" placeholder="Min 8 characters" autocomplete="new-password" aria-required="true">
+              <button class="password-toggle" onclick="togglePassword('su-pass', this)" aria-label="Show password">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <span class="form-error" id="su-pass-err" role="alert"></span>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="doSignup()">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Create Account
+          </button>
+        </div>
+        <p style="margin-top:14px;font-size:0.8rem;color:var(--text-light);text-align:center">
+          By signing up you agree to our <a href="#" onclick="openModal('privacy-modal');return false;" style="color:var(--green)">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     PAGE 2: APP SHELL
+====================================================== -->
+<div id="page-app" class="page" role="main" id="main-content">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" aria-label="Main navigation" id="sidebar">
+    <div class="sidebar-logo">
+      <h2><i class="fa-solid fa-book-open-reader" aria-hidden="true"></i> StudySync</h2>
+      <span>v2.0 • Beta</span>
+    </div>
+    <div class="nav-menu" role="menubar">
+      <button class="nav-item active" onclick="showSubPage('dashboard')" role="menuitem" aria-current="page">
+        <i class="fa-solid fa-house" aria-hidden="true"></i> Dashboard
+      </button>
+      <button class="nav-item" onclick="showSubPage('groups')" role="menuitem">
+        <i class="fa-solid fa-users" aria-hidden="true"></i> Find Groups
+      </button>
+      <button class="nav-item" onclick="showSubPage('chat')" role="menuitem">
+        <i class="fa-solid fa-comments" aria-hidden="true"></i> Chat
+        <span class="nav-badge" aria-label="3 unread messages">3</span>
+      </button>
+      <button class="nav-item" onclick="showSubPage('calendar')" role="menuitem">
+        <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Calendar
+      </button>
+      <button class="nav-item" onclick="showSubPage('profile')" role="menuitem">
+        <i class="fa-solid fa-user-gear" aria-hidden="true"></i> Profile
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="avatar" id="sidebar-avatar" aria-hidden="true">A</div>
+        <div class="user-chip-info">
+          <div class="user-chip-name" id="sidebar-name">Alex Johnson</div>
+          <div class="user-chip-role">Computer Science · Year 2</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- TOPBAR -->
+    <header class="topbar" role="banner">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div id="dnd-status" class="dnd-banner" role="status" aria-live="polite">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i> Do Not Disturb is ON
+        </div>
+        <button class="icon-btn" onclick="openModal('studybot-modal')" data-tooltip="Ask StudyBot" aria-label="Open StudyBot assistant">
+          <i class="fa-solid fa-robot" aria-hidden="true"></i>
+        </button>
+        <button class="icon-btn" onclick="openModal('notif-modal')" data-tooltip="Notifications" aria-label="Open notifications">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+        </button>
+        <button class="icon-btn" onclick="doLogout()" data-tooltip="Logout" aria-label="Log out">
+          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area" id="main-content" role="main">
+
+      <!-- ===== SUB: DASHBOARD ===== -->
+      <section class="sub-page active" id="sub-dashboard" aria-labelledby="dash-heading">
+        <div class="missed-banner" id="missed-banner" role="alert">
+          <i class="fa-solid fa-heart" aria-hidden="true"></i>
+          <p><strong>Hey, no worries!</strong> You missed Tuesday's session – that's totally okay. Your group understands! Want to <a href="#" onclick="showSubPage('calendar');return false;" style="color:var(--orange)">schedule a make-up session?</a> 💪</p>
+        </div>
+
+        <div class="welcome-banner" role="region" aria-label="Welcome section">
+          <h2 id="dash-heading">Good morning, <span id="welcome-name">Alex</span>! 👋</h2>
+          <p>Your group has studied <strong>24 hours</strong> together this month. Keep it up!</p>
+          <div class="welcome-meta" role="list">
+            <div class="welcome-stat" role="listitem">
+              <span class="val" aria-label="12 day streak">🔥 12</span>
+              <span class="lbl">Day Streak</span>
+            </div>
+            <div class="welcome-stat" role="listitem">
+              <span class="val">8.5h</span>
+              <span class="lbl">This Week</span>
+            </div>
+            <div class="welcome-stat" role="listitem">
+              <span class="val">#2</span>
+              <span class="lbl">Group Rank</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard toggle -->
+        <div class="leaderboard-toggle">
+          <label class="toggle-switch" for="lb-toggle" aria-label="Show leaderboard">
+            <input type="checkbox" id="lb-toggle" onchange="toggleLeaderboard(this)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span>Show Group Leaderboard</span>
+        </div>
+        <div class="leaderboard" id="leaderboard" aria-label="Group leaderboard" role="region">
+          <div class="lb-row"><span class="lb-rank gold" aria-label="Rank 1">🥇</span><div class="avatar" style="width:28px;height:28px;font-size:0.7rem" aria-hidden="true">J</div><span>Jamie K.</span><span class="lb-hrs">14.5h</span></div>
+          <div class="lb-row"><span class="lb-rank silver" aria-label="Rank 2">🥈</span><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;background:linear-gradient(135deg,#1976D2,#0D47A1)" aria-hidden="true">A</div><span id="lb-you">You</span><span class="lb-hrs">8.5h</span></div>
+          <div class="lb-row"><span class="lb-rank bronze" aria-label="Rank 3">🥉</span><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;background:linear-gradient(135deg,#E65100,#BF360C)" aria-hidden="true">P</div><span>Priya M.</span><span class="lb-hrs">6.2h</span></div>
+          <div class="lb-row"><span class="lb-rank" aria-label="Rank 4">4</span><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;background:linear-gradient(135deg,#6A1B9A,#4A148C)" aria-hidden="true">S</div><span>Sam T.</span><span class="lb-hrs">3.1h</span></div>
+        </div>
+
+        <div class="dash-grid" role="region" aria-label="Dashboard overview">
+
+          <!-- Current Group Card -->
+          <div class="card" role="region" aria-labelledby="group-card-title">
+            <div class="card-header">
+              <span class="card-title" id="group-card-title"><i class="fa-solid fa-users" aria-hidden="true"></i> Study Group</span>
+              <span class="card-badge">CS Students</span>
+            </div>
+            <div class="member-list" role="list" aria-label="Group members">
+              <div class="member-chip" role="listitem"><span class="online-dot" aria-label="Online"></span> Jamie K.</div>
+              <div class="member-chip" role="listitem"><span class="online-dot" aria-label="Online"></span> Priya M.</div>
+              <div class="member-chip" role="listitem"><span class="offline-dot" aria-label="Offline"></span> Sam T.</div>
+              <div class="member-chip" role="listitem"><span class="online-dot" aria-label="Online"></span> You</div>
+            </div>
+            <div class="streak-display" role="status" aria-live="polite">
+              <span class="streak-fire" aria-hidden="true">🔥</span>
+              <span class="streak-count" aria-label="12 day streak">12</span>
+              <span style="color:var(--text-light);font-size:0.85rem">day group streak!</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary btn-sm" onclick="showSubPage('calendar')" data-tooltip="Schedule a group session" aria-label="Schedule a study session">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Schedule
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="startPomodoroFromGroup()" data-tooltip="Start a Pomodoro timer" aria-label="Start Pomodoro timer">
+                <i class="fa-solid fa-clock" aria-hidden="true"></i> Timer
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="showSubPage('chat')" aria-label="Go to group chat">
+                <i class="fa-solid fa-comment" aria-hidden="true"></i> Chat
+              </button>
+            </div>
+          </div>
+
+          <!-- Pomodoro Timer Card -->
+          <div class="card" role="region" aria-labelledby="pomo-title">
+            <div class="card-header">
+              <span class="card-title" id="pomo-title"><i class="fa-solid fa-clock" aria-hidden="true"></i> Pomodoro Timer</span>
+              <span class="card-badge" id="pomo-phase">Focus</span>
+            </div>
+            <div class="pomodoro-display">
+              <div class="pomodoro-time" id="pomo-display" aria-live="polite" aria-label="Timer">25:00</div>
+              <div class="pomodoro-label" id="pomo-label">Ready to focus?</div>
+            </div>
+            <div class="pomodoro-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="pomodoro-bar" id="pomo-bar"></div>
+            </div>
+            <div class="pomodoro-controls">
+              <button class="btn btn-primary btn-sm" id="pomo-start-btn" onclick="togglePomodoro()" aria-label="Start Pomodoro timer">
+                <i class="fa-solid fa-play" aria-hidden="true"></i> Start
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="resetPomodoro()" aria-label="Reset Pomodoro timer">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('pomo-settings-modal')" aria-label="Pomodoro settings">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="studying-label" id="studying-label" aria-live="polite">Currently studying: Jamie, Priya, You</div>
+          </div>
+
+          <!-- Upcoming Sessions -->
+          <div class="card" role="region" aria-labelledby="sessions-title">
+            <div class="card-header">
+              <span class="card-title" id="sessions-title"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Upcoming Sessions</span>
+            </div>
+            <div role="list" aria-label="Upcoming study sessions">
+              <div class="session-item" role="listitem">
+                <div>
+                  <span class="session-time-badge">Today 3pm</span>
+                </div>
+                <div class="session-info">
+                  <div class="session-name">CS Data Structures</div>
+                  <div class="session-sub"><i class="fa-solid fa-video" aria-hidden="true"></i> Video call • 4 members</div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="showToast('Joining session...','info')" aria-label="Join CS Data Structures session">Join</button>
+              </div>
+              <div class="session-item" role="listitem">
+                <div>
+                  <span class="session-time-badge">Thu 2pm</span>
+                </div>
+                <div class="session-info">
+                  <div class="session-name">Algorithms Review</div>
+                  <div class="session-sub"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Library Rm 204</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Added to calendar!','success')" aria-label="Add Algorithms Review to calendar">RSVP</button>
+              </div>
+              <div class="session-item" role="listitem">
+                <div>
+                  <span class="session-time-badge">Fri 6pm</span>
+                </div>
+                <div class="session-info">
+                  <div class="session-name">Exam Prep Sprint</div>
+                  <div class="session-sub"><i class="fa-solid fa-video" aria-hidden="true"></i> Video call • 4 members</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('RSVP confirmed!','success')" aria-label="RSVP for Exam Prep Sprint">RSVP</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task Tracker -->
+          <div class="card" role="region" aria-labelledby="tasks-title">
+            <div class="card-header">
+              <span class="card-title" id="tasks-title"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Task Tracker</span>
+              <span class="card-badge" id="task-count">0/4</span>
+            </div>
+            <div id="task-list" role="list" aria-label="Study tasks" aria-live="polite">
+              <div class="task-item" role="listitem" draggable="true">
+                <input type="checkbox" onchange="updateTaskCount(this)" aria-label="Task: Read Chapter 7 - Sorting Algorithms">
+                <span class="task-text">Read Chapter 7 – Sorting Algorithms</span>
+                <span class="task-assignee" aria-label="Assigned to Jamie">Jamie</span>
+                <button class="task-react" onclick="reactTask(this)" aria-label="React with emoji">⭐</button>
+              </div>
+              <div class="task-item" role="listitem" draggable="true">
+                <input type="checkbox" onchange="updateTaskCount(this)" aria-label="Task: Complete Problem Set 3">
+                <span class="task-text">Complete Problem Set 3</span>
+                <span class="task-assignee" aria-label="Assigned to you">You</span>
+                <button class="task-react" onclick="reactTask(this)" aria-label="React with emoji">⭐</button>
+              </div>
+              <div class="task-item" role="listitem" draggable="true">
+                <input type="checkbox" onchange="updateTaskCount(this)" aria-label="Task: Watch lecture recording">
+                <span class="task-text">Watch lecture recording</span>
+                <span class="task-assignee" aria-label="Assigned to Priya">Priya</span>
+                <button class="task-react" onclick="reactTask(this)" aria-label="React with emoji">⭐</button>
+              </div>
+              <div class="task-item" role="listitem" draggable="true">
+                <input type="checkbox" onchange="updateTaskCount(this)" aria-label="Task: Create flashcard deck">
+                <span class="task-text">Create flashcard deck</span>
+                <span class="task-assignee" aria-label="Assigned to Sam">Sam</span>
+                <button class="task-react" onclick="reactTask(this)" aria-label="React with emoji">⭐</button>
+              </div>
+            </div>
+            <div class="task-add">
+              <input type="text" id="task-input" placeholder="Add a task… press Enter" aria-label="New task name" onkeydown="if(event.key==='Enter')addTask()">
+              <button class="btn btn-primary btn-sm" onclick="addTask()" aria-label="Add task">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Preview -->
+          <div class="card" role="region" aria-labelledby="chat-preview-title">
+            <div class="card-header">
+              <span class="card-title" id="chat-preview-title"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Chat Preview</span>
+              <span class="card-badge" style="background:var(--red-pale);color:var(--red)">3 new</span>
+            </div>
+            <div role="log" aria-label="Recent chat messages" aria-live="polite">
+              <div class="chat-msg">
+                <div class="chat-msg-author">Jamie K.</div>
+                <div class="chat-msg-text">Has everyone finished the reading? 📚</div>
+              </div>
+              <div class="chat-msg">
+                <div class="chat-msg-author">Priya M.</div>
+                <div class="chat-msg-text">Almost done! See you at 3pm 👍</div>
+              </div>
+              <div class="chat-msg">
+                <div class="chat-msg-author">Sam T.</div>
+                <div class="chat-msg-text">Can we push it to 3:30? Just finishing up...</div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="showSubPage('chat')" aria-label="Open full chat">
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Open Chat
+            </button>
+          </div>
+
+          <!-- Progress Card -->
+          <div class="card" role="region" aria-labelledby="progress-title">
+            <div class="card-header">
+              <span class="card-title" id="progress-title"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Your Progress</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-label"><span>Weekly Goal</span><span>8.5h / 10h</span></div>
+              <div class="progress-track" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Weekly goal: 85% complete">
+                <div class="progress-fill" style="width:85%"></div>
+              </div>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-label"><span>Monthly Hours</span><span>24h / 40h</span></div>
+              <div class="progress-track" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" aria-label="Monthly hours: 60% complete">
+                <div class="progress-fill" style="width:60%;background:linear-gradient(90deg,var(--blue),#64B5F6)"></div>
+              </div>
+            </div>
+            <div class="badge-row" role="list" aria-label="Earned badges">
+              <div class="badge earned" role="listitem" data-tooltip="Attended 5 sessions in a row!" aria-label="Hot Streak badge - earned">
+                <i class="fa-solid fa-fire" aria-hidden="true"></i>Hot Streak
+              </div>
+              <div class="badge earned" role="listitem" data-tooltip="First session completed!" aria-label="First Session badge - earned">
+                <i class="fa-solid fa-star" aria-hidden="true"></i>First Session
+              </div>
+              <div class="badge" role="listitem" data-tooltip="Study 20 hours in a week" aria-label="Study Machine badge - not yet earned">
+                <i class="fa-solid fa-brain" aria-hidden="true"></i>Study Machine
+              </div>
+              <div class="badge" role="listitem" data-tooltip="Help 3 group members" aria-label="Mentor badge - not yet earned">
+                <i class="fa-solid fa-hands-helping" aria-hidden="true"></i>Mentor
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="fireConfetti();openModal('session-complete-modal')" aria-label="Complete session and see summary">
+              <i class="fa-solid fa-trophy" aria-hidden="true"></i> Complete Session
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===== SUB: GROUPS ===== -->
+      <section class="sub-page" id="sub-groups" aria-labelledby="groups-heading">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <h2 id="groups-heading" style="font-family:var(--font-display);font-size:1.4rem">Find Your Study Group</h2>
+          <button class="btn btn-primary" onclick="openModal('create-group-modal')" aria-label="Create a new study group">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Create New Group
+          </button>
+        </div>
+        <div class="filters-bar" role="search" aria-label="Filter study groups">
+          <select aria-label="Filter by course" onchange="filterGroups()">
+            <option value="">All Courses</option>
+            <option>Computer Science</option>
+            <option>Mathematics</option>
+            <option>Physics</option>
+            <option>Engineering</option>
+            <option>Psychology</option>
+          </select>
+          <select aria-label="Filter by study method" onchange="filterGroups()">
+            <option value="">All Methods</option>
+            <option>Pomodoro</option>
+            <option>Active Recall</option>
+            <option>Flashcards</option>
+            <option>Revision Quizzes</option>
+          </select>
+          <select aria-label="Filter by meeting frequency" onchange="filterGroups()">
+            <option value="">Any Frequency</option>
+            <option>Daily</option>
+            <option>3× weekly</option>
+            <option>Weekly</option>
+            <option>Bi-weekly</option>
+          </select>
+          <div id="groups-spinner" class="spinner" style="display:none;width:24px;height:24px;margin:0" aria-label="Loading groups"></div>
+        </div>
+        <div class="groups-grid" id="groups-grid" role="list" aria-label="Available study groups">
+          <!-- rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ===== SUB: CHAT ===== -->
+      <section class="sub-page" id="sub-chat" aria-labelledby="chat-heading" style="padding:0">
+        <div class="chat-layout">
+          <aside class="chat-sidebar" aria-label="Chat rooms">
+            <h3 id="chat-heading">Rooms</h3>
+            <div class="chat-room-item active" onclick="switchRoom(this,'CS Study Group')" role="button" tabindex="0" aria-label="CS Study Group room - active">
+              <span class="dot" style="background:#4CAF50" aria-hidden="true"></span> CS Study Group
+            </div>
+            <div class="chat-room-item" onclick="switchRoom(this,'Algorithms Channel')" role="button" tabindex="0" aria-label="Algorithms Channel room">
+              <span class="dot" style="background:#1976D2" aria-hidden="true"></span> Algorithms Channel
+            </div>
+            <div class="chat-room-item" onclick="switchRoom(this,'Exam Prep')" role="button" tabindex="0" aria-label="Exam Prep room">
+              <span class="dot" style="background:#E65100" aria-hidden="true"></span> Exam Prep
+            </div>
+            <h3 style="margin-top:16px">Members</h3>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:0.85rem">
+              <div style="display:flex;align-items:center;gap:6px"><span class="online-dot" aria-label="Online"></span> Jamie K.</div>
+              <div style="display:flex;align-items:center;gap:6px"><span class="online-dot" aria-label="Online"></span> Priya M.</div>
+              <div style="display:flex;align-items:center;gap:6px"><span class="offline-dot" aria-label="Offline"></span> Sam T.</div>
+            </div>
+          </aside>
+          <div class="chat-main">
+            <div style="padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:700" id="chat-room-title" aria-live="polite">CS Study Group</span>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-secondary btn-sm" onclick="openModal('shoutout-modal')" aria-label="Give a shout-out to a group member">
+                  <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i> Shout-out
+                </button>
+                <button class="icon-btn" onclick="showToast('Chat muted for 1 hour','info')" data-tooltip="Mute chat" aria-label="Mute chat notifications">
+                  <i class="fa-solid fa-bell-slash" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="chat-messages" id="chat-messages" role="log" aria-label="Chat messages" aria-live="polite">
+              <div class="shoutout-bubble" role="note" aria-label="Shout-out message">
+                <div class="so-title">🎉 Shout-out!</div>
+                <div>Amazing work by <strong>Priya</strong> on the data structures summary sheet! Super helpful 🙌</div>
+              </div>
+              <div class="chat-bubble">
+                <div class="avatar" aria-hidden="true" style="width:32px;height:32px;font-size:0.7rem">J</div>
+                <div>
+                  <div class="bubble-author">Jamie K.</div>
+                  <div class="bubble-content">Hey team! Ready for today's session? 😊</div>
+                </div>
+              </div>
+              <div class="chat-bubble">
+                <div class="avatar" aria-hidden="true" style="width:32px;height:32px;font-size:0.7rem;background:linear-gradient(135deg,#E65100,#BF360C)">P</div>
+                <div>
+                  <div class="bubble-author">Priya M.</div>
+                  <div class="bubble-content">Yes! <span class="mention">@Jamie</span> did you finish the sorting chapter?</div>
+                </div>
+              </div>
+              <div class="chat-bubble mine">
+                <div class="avatar" aria-hidden="true" style="width:32px;height:32px;font-size:0.7rem;background:linear-gradient(135deg,#1976D2,#0D47A1)">A</div>
+                <div>
+                  <div class="bubble-author">You</div>
+                  <div class="bubble-content">Almost done! 5 pages to go 📚</div>
+                </div>
+              </div>
+              <div class="chat-bubble">
+                <div class="avatar" aria-hidden="true" style="width:32px;height:32px;font-size:0.7rem;background:linear-gradient(135deg,#6A1B9A,#4A148C)">S</div>
+                <div>
+                  <div class="bubble-author">Sam T.</div>
+                  <div class="bubble-content">Can we move to 3:30? Still wrapping up problem set 😅</div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-area" role="form" aria-label="Send a message">
+              <div class="chat-input-row">
+                <div class="chat-input-wrap">
+                  <input type="text" id="chat-input" placeholder="Type a message… use @ to mention" aria-label="Chat message input" onkeydown="if(event.key==='Enter')sendChatMessage()">
+                  <div class="emoji-bar">
+                    <button class="emoji-btn" onclick="insertEmoji('👍')" aria-label="Insert thumbs up">👍</button>
+                    <button class="emoji-btn" onclick="insertEmoji('🎉')" aria-label="Insert celebration">🎉</button>
+                    <button class="emoji-btn" onclick="insertEmoji('🙌')" aria-label="Insert hands raised">🙌</button>
+                  </div>
+                </div>
+                <button class="send-btn" onclick="sendChatMessage()" aria-label="Send message">
+                  <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SUB: CALENDAR ===== -->
+      <section class="sub-page" id="sub-calendar" aria-labelledby="cal-heading">
+        <div class="cal-header">
+          <h2 id="cal-heading" style="font-family:var(--font-display);font-size:1.3rem">
+            <button class="icon-btn" onclick="changeWeek(-1)" aria-label="Previous week"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+            <span id="cal-week-label" style="margin:0 12px">Week of 19 May 2025</span>
+            <button class="icon-btn" onclick="changeWeek(1)" aria-label="Next week"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+          </h2>
+          <button class="btn btn-primary" onclick="openModal('create-session-modal')" aria-label="Create a new study session">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Create Session
+          </button>
+        </div>
+        <div class="cal-week" id="calendar-grid" role="grid" aria-label="Weekly calendar"></div>
+        <div style="display:flex;gap:12px;margin-top:12px;font-size:0.82rem;flex-wrap:wrap" role="list" aria-label="Calendar legend">
+          <span role="listitem"><span style="display:inline-block;width:12px;height:12px;background:var(--green);border-radius:3px;margin-right:4px" aria-hidden="true"></span>Focus</span>
+          <span role="listitem"><span style="display:inline-block;width:12px;height:12px;background:var(--blue);border-radius:3px;margin-right:4px" aria-hidden="true"></span>Video Call</span>
+          <span role="listitem"><span style="display:inline-block;width:12px;height:12px;background:var(--orange);border-radius:3px;margin-right:4px" aria-hidden="true"></span>In-Person</span>
+        </div>
+      </section>
+
+      <!-- ===== SUB: PROFILE ===== -->
+      <section class="sub-page" id="sub-profile" aria-labelledby="profile-heading">
+        <h2 id="profile-heading" style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:20px">Profile & Settings</h2>
+        <div class="profile-grid">
+
+          <!-- Profile header -->
+          <div class="card profile-header-card" role="region" aria-label="Profile information">
+            <div class="avatar-lg" id="profile-avatar" aria-hidden="true">A</div>
+            <div>
+              <h3 style="font-size:1.1rem;font-weight:700" id="profile-name-display">Alex Johnson</h3>
+              <p style="color:var(--text-mid);font-size:0.88rem" id="profile-email-display">demo1@university.edu</p>
+              <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                <span class="tag"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Computer Science</span>
+                <span class="tag"><i class="fa-solid fa-clock" aria-hidden="true"></i> Pomodoro</span>
+                <span class="tag" id="profile-streak-tag">🔥 12-day streak</span>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="margin-left:auto;align-self:flex-start" onclick="openModal('edit-profile-modal')" aria-label="Edit profile">
+              <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit
+            </button>
+          </div>
+
+          <!-- Availability -->
+          <div class="card" role="region" aria-labelledby="avail-heading">
+            <div class="card-header">
+              <span class="card-title" id="avail-heading"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Availability</span>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Availability updated!','success')" aria-label="Save availability changes">Save</button>
+            </div>
+            <div class="availability-grid" role="group" aria-label="Available days">
+              <label class="avail-check"><input type="checkbox" checked aria-label="Monday available"> Mon</label>
+              <label class="avail-check"><input type="checkbox" checked aria-label="Tuesday available"> Tue</label>
+              <label class="avail-check"><input type="checkbox" checked aria-label="Wednesday available"> Wed</label>
+              <label class="avail-check"><input type="checkbox" aria-label="Thursday available"> Thu</label>
+              <label class="avail-check"><input type="checkbox" checked aria-label="Friday available"> Fri</label>
+              <label class="avail-check"><input type="checkbox" aria-label="Saturday available"> Sat</label>
+              <label class="avail-check"><input type="checkbox" aria-label="Sunday available"> Sun</label>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="card" role="region" aria-labelledby="notif-heading">
+            <div class="card-header">
+              <span class="card-title" id="notif-heading"><i class="fa-solid fa-bell" aria-hidden="true"></i> Notifications</span>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Session Reminders</div><div class="toggle-sub">30 min before each session</div></div>
+              <label class="toggle-switch" aria-label="Toggle session reminders">
+                <input type="checkbox" checked><span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Chat Messages</div><div class="toggle-sub">New messages from group</div></div>
+              <label class="toggle-switch" aria-label="Toggle chat message notifications">
+                <input type="checkbox" checked><span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Task Assignments</div><div class="toggle-sub">When you're assigned a task</div></div>
+              <label class="toggle-switch" aria-label="Toggle task assignment notifications">
+                <input type="checkbox"><span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Weekly Recap</div><div class="toggle-sub">Every Sunday evening</div></div>
+              <label class="toggle-switch" aria-label="Toggle weekly recap notifications">
+                <input type="checkbox" checked><span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Preferences -->
+          <div class="card" role="region" aria-labelledby="prefs-heading">
+            <div class="card-header">
+              <span class="card-title" id="prefs-heading"><i class="fa-solid fa-sliders" aria-hidden="true"></i> Preferences</span>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Dark Mode</div><div class="toggle-sub">Easy on the eyes</div></div>
+              <label class="toggle-switch" aria-label="Toggle dark mode">
+                <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this)"><span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Do Not Disturb</div><div class="toggle-sub">Silence all notifications</div></div>
+              <label class="toggle-switch" aria-label="Toggle Do Not Disturb mode">
+                <input type="checkbox" id="dnd-toggle" onchange="toggleDND(this)"><span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Show in Leaderboard</div><div class="toggle-sub">Let others see your hours</div></div>
+              <label class="toggle-switch" aria-label="Toggle leaderboard visibility">
+                <input type="checkbox" checked><span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="card" style="border-color:var(--red)" role="region" aria-labelledby="danger-heading">
+            <div class="card-header">
+              <span class="card-title" id="danger-heading" style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Danger Zone</span>
+            </div>
+            <p style="font-size:0.88rem;color:var(--text-mid);margin-bottom:14px">These actions are permanent and cannot be undone.</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-secondary btn-sm" onclick="openModal('leave-group-modal')" aria-label="Leave current study group">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Leave Current Group
+              </button>
+              <button class="btn btn-red btn-sm" onclick="openModal('delete-account-modal')" aria-label="Delete account permanently">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i> Delete Account
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div><!-- end content-area -->
+  </div><!-- end main-content -->
+</div><!-- end page-app -->
+
+<!-- ======================================================
+     MODALS
+====================================================== -->
+
+<!-- Session Complete Modal -->
+<div class="modal-overlay" id="session-complete-modal" role="dialog" aria-modal="true" aria-labelledby="sc-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="sc-title">Session Complete! 🎉</h3>
+      <button class="modal-close" onclick="closeModal('session-complete-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="session-complete-emoji" aria-hidden="true">🏆</div>
+      <p style="text-align:center;color:var(--text-mid);margin-bottom:12px">Amazing work today, Alex! Here's your session summary:</p>
+      <div class="session-stats-grid">
+        <div class="session-stat"><div class="val">2h 5m</div><div class="lbl">Study Time</div></div>
+        <div class="session-stat"><div class="val">5</div><div class="lbl">Tasks Done</div></div>
+        <div class="session-stat"><div class="val">4</div><div class="lbl">Members</div></div>
+        <div class="session-stat"><div class="val">🔥 13</div><div class="lbl">New Streak!</div></div>
+      </div>
+      <p style="text-align:center;font-size:0.88rem;color:var(--text-mid)">You earned a new badge: <strong>🔥 Hot Streak</strong>!</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('session-complete-modal')">Close</button>
+      <button class="btn btn-primary" onclick="closeModal('session-complete-modal');showSubPage('chat')">Share with Group</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Session Modal -->
+<div class="modal-overlay" id="create-session-modal" role="dialog" aria-modal="true" aria-labelledby="cs-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="cs-title">Create Study Session</h3>
+      <button class="modal-close" onclick="closeModal('create-session-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-form">
+        <div class="form-group">
+          <label for="cs-name">Session Name</label>
+          <input type="text" id="cs-name" placeholder="e.g. Data Structures Review" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="cs-date">Date</label>
+          <input type="date" id="cs-date" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="cs-time">Start Time (15-min increments)</label>
+          <select id="cs-time" aria-required="true"></select>
+        </div>
+        <div class="form-group">
+          <label for="cs-duration">Duration</label>
+          <select id="cs-duration">
+            <option value="30">30 minutes</option>
+            <option value="60" selected>1 hour</option>
+            <option value="90">1.5 hours</option>
+            <option value="120">2 hours</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cs-type">Session Type</label>
+          <select id="cs-type" aria-required="true">
+            <option value="video">📹 Video Call</option>
+            <option value="inperson">🏢 In-Person</option>
+            <option value="focus">🎯 Solo Focus</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('create-session-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createCalendarSession()">Create Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Group Modal -->
+<div class="modal-overlay" id="create-group-modal" role="dialog" aria-modal="true" aria-labelledby="cg-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="cg-title">Create New Group</h3>
+      <button class="modal-close" onclick="closeModal('create-group-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-form">
+        <div class="form-group">
+          <label for="cg-name">Group Name</label>
+          <input type="text" id="cg-name" placeholder="e.g. CS Finals Crew" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="cg-course">Course</label>
+          <select id="cg-course" aria-required="true">
+            <option>Computer Science</option>
+            <option>Mathematics</option>
+            <option>Physics</option>
+            <option>Engineering</option>
+            <option>Psychology</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cg-method">Study Method</label>
+          <select id="cg-method" aria-required="true">
+            <option>Pomodoro</option>
+            <option>Active Recall</option>
+            <option>Flashcards</option>
+            <option>Revision Quizzes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cg-max">Max Members</label>
+          <select id="cg-max">
+            <option value="3">3 members</option>
+            <option value="4" selected>4 members</option>
+            <option value="5">5 members</option>
+            <option value="6">6 members</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('create-group-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createGroup()">Create Group</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shoutout Modal -->
+<div class="modal-overlay" id="shoutout-modal" role="dialog" aria-modal="true" aria-labelledby="so-title-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="so-title-modal">🎉 Give a Shout-Out</h3>
+      <button class="modal-close" onclick="closeModal('shoutout-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-mid);margin-bottom:14px;font-size:0.9rem">Celebrate your teammates' hard work! 💪</p>
+      <div class="auth-form">
+        <div class="form-group">
+          <label for="so-member">Member to praise</label>
+          <select id="so-member" aria-required="true">
+            <option>Jamie K.</option>
+            <option>Priya M.</option>
+            <option>Sam T.</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="so-msg">What did they do great?</label>
+          <input type="text" id="so-msg" placeholder="e.g. Helped everyone understand recursion!" aria-required="true">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('shoutout-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendShoutout()">
+        <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i> Send Shout-Out
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal-overlay" id="delete-account-modal" role="dialog" aria-modal="true" aria-labelledby="da-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="da-title" style="color:var(--red)">Delete Account</h3>
+      <button class="modal-close" onclick="closeModal('delete-account-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px">We're sorry to see you go! 😢 Deleting your account will:</p>
+      <ul style="font-size:0.9rem;color:var(--text-mid);padding-left:20px;margin-bottom:16px;line-height:2">
+        <li>Remove all your progress and badges</li>
+        <li>Remove you from all study groups</li>
+        <li>Delete your chat history permanently</li>
+      </ul>
+      <div class="form-group">
+        <label for="da-confirm">Type DELETE to confirm</label>
+        <input type="text" id="da-confirm" placeholder="DELETE" aria-required="true">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('delete-account-modal')">Cancel, Keep Account</button>
+      <button class="btn btn-red" onclick="confirmDeleteAccount()">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leave Group Modal -->
+<div class="modal-overlay" id="leave-group-modal" role="dialog" aria-modal="true" aria-labelledby="lg-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="lg-title">Leave Study Group?</h3>
+      <button class="modal-close" onclick="closeModal('leave-group-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-mid)">Are you sure you want to leave <strong>CS Study Group</strong>? Your progress will be saved but you'll no longer have access to the group chat and sessions.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('leave-group-modal')">Stay in Group</button>
+      <button class="btn btn-red" onclick="closeModal('leave-group-modal');showToast('You left the group. Hope to see you back soon! 💙','warning')">Leave Group</button>
+    </div>
+  </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div class="modal-overlay" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="pp-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="pp-title">Privacy Policy</h3>
+      <button class="modal-close" onclick="closeModal('privacy-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="privacy-content" tabindex="0" aria-label="Privacy policy content">
+        <h4>1. Data We Collect</h4>
+        <p>We collect your university email, name, and study preferences to match you with compatible study groups. We never sell your personal information to third parties.</p>
+        <h4>2. How We Use Your Data</h4>
+        <p>Your availability and study preferences are used solely for matching you with study groups and personalising your dashboard experience.</p>
+        <h4>3. Chat & Messages</h4>
+        <p>Messages in group chats are visible only to group members. We do not read or share your private messages.</p>
+        <h4>4. Progress Data</h4>
+        <p>Study hours and progress are stored locally and on secure servers. You can export or delete your data at any time from your profile settings.</p>
+        <h4>5. Cookies</h4>
+        <p>We use session cookies for authentication only. No tracking or advertising cookies are used.</p>
+        <h4>6. Contact</h4>
+        <p>For privacy concerns, contact privacy@studysync.edu</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('privacy-modal')">Got It</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="edit-profile-modal" role="dialog" aria-modal="true" aria-labelledby="ep-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="ep-title">Edit Profile</h3>
+      <button class="modal-close" onclick="closeModal('edit-profile-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-form">
+        <div class="form-group">
+          <label for="ep-name">Full Name</label>
+          <input type="text" id="ep-name" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="ep-course">Course</label>
+          <input type="text" id="ep-course" aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="ep-method">Study Method</label>
+          <select id="ep-method">
+            <option>Pomodoro</option>
+            <option>Active Recall</option>
+            <option>Flashcards</option>
+            <option>Revision Quizzes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('edit-profile-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications Modal -->
+<div class="modal-overlay" id="notif-modal" role="dialog" aria-modal="true" aria-labelledby="nm-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="nm-title">Notifications</h3>
+      <button class="modal-close" onclick="closeModal('notif-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;background:var(--green-pale);border-radius:var(--radius-sm)">
+        <i class="fa-solid fa-calendar-check" style="color:var(--green);margin-top:2px" aria-hidden="true"></i>
+        <div><strong>Session in 30 minutes!</strong><br><span style="font-size:0.82rem;color:var(--text-mid)">CS Data Structures at 3pm today</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;background:var(--blue-pale);border-radius:var(--radius-sm)">
+        <i class="fa-solid fa-user-plus" style="color:var(--blue);margin-top:2px" aria-hidden="true"></i>
+        <div><strong>New member joined!</strong><br><span style="font-size:0.82rem;color:var(--text-mid)">Sam T. joined your study group</span></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;background:var(--surface2);border-radius:var(--radius-sm)">
+        <i class="fa-solid fa-star" style="color:var(--yellow);margin-top:2px" aria-hidden="true"></i>
+        <div><strong>Badge earned!</strong><br><span style="font-size:0.82rem;color:var(--text-mid)">You earned the "Hot Streak" badge 🔥</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('notif-modal')">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pomodoro Settings Modal -->
+<div class="modal-overlay" id="pomo-settings-modal" role="dialog" aria-modal="true" aria-labelledby="ps-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="ps-title">Pomodoro Settings</h3>
+      <button class="modal-close" onclick="closeModal('pomo-settings-modal')" aria-label="Close modal"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-form">
+        <div class="form-group">
+          <label for="ps-focus">Focus Duration (minutes)</label>
+          <input type="number" id="ps-focus" value="25" min="5" max="60" step="5">
+        </div>
+        <div class="form-group">
+          <label for="ps-break">Short Break (minutes)</label>
+          <input type="number" id="ps-break" value="5" min="1" max="30" step="1">
+        </div>
+        <div class="form-group">
+          <label for="ps-long">Long Break (minutes)</label>
+          <input type="number" id="ps-long" value="15" min="5" max="60" step="5">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('pomo-settings-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePomodoroSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- StudyBot Modal -->
+<div class="modal-overlay" id="studybot-modal" role="dialog" aria-modal="true" aria-labelledby="sb-title-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header" style="background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;border-radius:var(--radius) var(--radius) 0 0">
+      <h3 id="sb-title-modal" style="color:#fff"><i class="fa-solid fa-robot" aria-hidden="true"></i> StudyBot FAQ</h3>
+      <button class="modal-close" onclick="closeModal('studybot-modal')" style="color:rgba(255,255,255,0.8)" aria-label="Close StudyBot"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div class="studybot-messages" id="studybot-msgs" role="log" aria-label="StudyBot conversation" aria-live="polite">
+        <div class="bot-msg" role="note">👋 Hi! I'm StudyBot. Ask me anything about StudySync! Try: "How do I join a group?", "What is Pomodoro?", or "How do streaks work?"</div>
+      </div>
+      <div class="studybot-input">
+        <input type="text" id="studybot-input" placeholder="Ask StudyBot…" aria-label="Ask StudyBot a question" onkeydown="if(event.key==='Enter')sendBotMessage()">
+        <button onclick="sendBotMessage()" aria-label="Send message to StudyBot"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" role="region" aria-label="Notifications" aria-live="assertive"></div>
+
+<script>
+// ======================================================
+// DATA & STATE
+// ======================================================
+const demoAccounts = {
+  'demo1@university.edu': { name: 'Alex Johnson', course: 'Computer Science', method: 'Pomodoro' },
+  'demo2@university.edu': { name: 'Jamie Kim', course: 'Mathematics', method: 'Active Recall' },
+  'demo3@university.edu': { name: 'Priya Mehta', course: 'Physics', method: 'Flashcards' },
+};
+
+let currentUser = null;
+let pomodoroInterval = null;
+let pomodoroRunning = false;
+let pomodoroSeconds = 25 * 60;
+let pomodoroTotal = 25 * 60;
+let pomodoroSettings = { focus: 25, shortBreak: 5, longBreak: 15 };
+let calendarWeekOffset = 0;
+let taskTotal = 4;
+let taskDone = 0;
+let calendarEvents = [
+  { day: 1, hour: 15, label: 'CS Study', type: 'video' },
+  { day: 3, hour: 14, label: 'Algorithms', type: 'inperson' },
+  { day: 4, hour: 18, label: 'Exam Prep', type: 'video' },
+];
+
+const studyGroups = [
+  { name: 'CS Algorithms Crew', course: 'Computer Science', method: 'Pomodoro', freq: '3× weekly', members: 3, max: 4, match: 96, colors: ['#2E7D32','#1976D2','#E65100'] },
+  { name: 'Math Warriors', course: 'Mathematics', method: 'Active Recall', freq: 'Daily', members: 4, max: 5, match: 82, colors: ['#6A1B9A','#F9A825','#2E7D32','#C62828'] },
+  { name: 'Physics Lab Group', course: 'Physics', method: 'Flashcards', freq: 'Weekly', members: 2, max: 4, match: 74, colors: ['#1976D2','#0D47A1'] },
+  { name: 'Engineering Pals', course: 'Engineering', method: 'Revision Quizzes', freq: 'Bi-weekly', members: 5, max: 6, match: 65, colors: ['#E65100','#1976D2','#2E7D32','#6A1B9A','#C62828'] },
+  { name: 'Psychology Circle', course: 'Psychology', method: 'Active Recall', freq: '3× weekly', members: 3, max: 4, match: 58, colors: ['#F9A825','#E65100','#2E7D32'] },
+  { name: 'CS Finals Sprint', course: 'Computer Science', method: 'Revision Quizzes', freq: 'Daily', members: 2, max: 3, match: 91, colors: ['#2E7D32','#C62828'] },
+];
+
+const botFAQ = [
+  { q: ['join', 'group'], a: 'To join a group, go to **Find Groups** in the sidebar, browse available groups, and click **Join** on any that match your course and style! 🎯' },
+  { q: ['pomodoro', 'timer', 'technique'], a: 'The Pomodoro Technique breaks study time into 25-minute focus sessions with 5-minute breaks. After 4 sessions, take a longer 15-minute break. It boosts focus and prevents burnout! 🍅' },
+  { q: ['streak', 'streaks', 'fire'], a: 'Streaks count consecutive days your group studies together. Keep your streak going by attending sessions regularly – even 30 minutes counts! 🔥' },
+  { q: ['badge', 'badges', 'earn'], a: 'Badges are earned by reaching milestones: attending your first session, maintaining streaks, studying 20+ hours/week, and more! Check your Progress card on the dashboard. 🏅' },
+  { q: ['schedule', 'session', 'calendar'], a: 'Go to **Calendar** in the sidebar and click **Create Session**. Set the date, time (15-min increments), and type (Video or In-Person). Your group will be notified! 📅' },
+  { q: ['shoutout', 'praise', 'appreciate'], a: 'Open the Chat page and click **Shout-Out** to publicly praise a group member. It appears as a special highlighted message for the whole group to see! 🎉' },
+  { q: ['dark', 'mode', 'theme'], a: 'You can enable Dark Mode from **Profile > Preferences** or toggle it from the profile page. Easy on the eyes for late-night study sessions! 🌙' },
+  { q: ['delete', 'account'], a: 'You can delete your account from **Profile > Danger Zone**. This is permanent and removes all your data. We recommend exporting first!' },
+];
+
+// ======================================================
+// AUTH
+// ======================================================
+function switchAuthTab(tab) {
+  document.getElementById('panel-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('panel-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('tab-login').setAttribute('aria-selected', tab === 'login');
+  document.getElementById('tab-signup').setAttribute('aria-selected', tab === 'signup');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  let ok = true;
+  if (!email || !email.includes('@')) { showFieldError('login-email-err', 'Please enter a valid university email'); ok = false; }
+  else hideFieldError('login-email-err');
+  if (!pass) { showFieldError('login-pass-err', 'Please enter your password'); ok = false; }
+  else hideFieldError('login-pass-err');
+  if (!ok) return;
+  const demo = demoAccounts[email];
+  if (demo) {
+    currentUser = { ...demo, email };
+    enterApp();
+  } else {
+    showFieldError('login-email-err', 'Hmm, we don\'t recognise that email. Try a demo account!');
+  }
+}
+
+function doSignup() {
+  const name = document.getElementById('su-name').value.trim();
+  const email = document.getElementById('su-email').value.trim().toLowerCase();
+  const pass = document.getElementById('su-pass').value;
+  let ok = true;
+  if (!name) { showFieldError('su-name-err', 'Please tell us your name!'); ok = false; } else hideFieldError('su-name-err');
+  if (!email || !email.includes('@')) { showFieldError('su-email-err', 'Looks like that email isn\'t quite right'); ok = false; } else hideFieldError('su-email-err');
+  if (pass.length < 8) { showFieldError('su-pass-err', 'Password needs at least 8 characters'); ok = false; } else hideFieldError('su-pass-err');
+  if (!ok) return;
+  currentUser = { name, email, course: document.getElementById('su-course').value || 'General Studies', method: document.getElementById('su-method').value || 'Pomodoro' };
+  enterApp();
+  showToast('Welcome to StudySync! 🎉 Your account is ready.', 'success');
+}
+
+function enterApp() {
+  localStorage.setItem('ss_user', JSON.stringify(currentUser));
+  showPage('page-app');
+  initApp();
+}
+
+function doLogout() {
+  if (!confirm('Are you sure you want to log out?')) return;
+  localStorage.removeItem('ss_user');
+  currentUser = null;
+  resetPomodoro();
+  showPage('page-auth');
+}
+
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideFieldError(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('show');
+}
+
+function togglePassword(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const isPass = inp.type === 'password';
+  inp.type = isPass ? 'text' : 'password';
+  btn.querySelector('i').className = isPass ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+  btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+}
+
+// ======================================================
+// APP INIT
+// ======================================================
+function initApp() {
+  const saved = localStorage.getItem('ss_user');
+  if (saved && !currentUser) currentUser = JSON.parse(saved);
+  if (!currentUser) return;
+
+  // Update UI with user
+  const firstName = currentUser.name.split(' ')[0];
+  document.getElementById('welcome-name').textContent = firstName;
+  document.getElementById('sidebar-name').textContent = currentUser.name;
+  document.getElementById('sidebar-avatar').textContent = currentUser.name[0];
+
+  // Profile page
+  document.getElementById('profile-name-display').textContent = currentUser.name;
+  document.getElementById('profile-email-display').textContent = currentUser.email;
+  document.getElementById('profile-avatar').textContent = currentUser.name[0];
+  document.getElementById('ep-name').value = currentUser.name;
+  document.getElementById('ep-course').value = currentUser.course || '';
+
+  // LB "You" label
+  const lbYou = document.getElementById('lb-you');
+  if (lbYou) lbYou.textContent = firstName + ' (You)';
+
+  // Groups
+  renderGroups(studyGroups);
+
+  // Calendar
+  renderCalendar();
+
+  // Task sortable
+  try { Sortable.create(document.getElementById('task-list'), { animation: 150, ghostClass: 'task-drag' }); } catch(e) {}
+
+  // Time slots
+  populateTimeSlots();
+
+  // Check if dark mode was saved
+  const dm = localStorage.getItem('ss_dark');
+  if (dm === 'true') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('dark-mode-toggle').checked = true;
+  }
+
+  // Show missed banner after 2s
+  setTimeout(() => {
+    document.getElementById('missed-banner').classList.add('show');
+  }, 1500);
+}
+
+// ======================================================
+// NAVIGATION
+// ======================================================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+  const page = document.getElementById(id);
+  page.style.display = 'flex';
+  page.classList.add('active');
+}
+
+function showSubPage(name) {
+  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('sub-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { dashboard: 0, groups: 1, chat: 2, calendar: 3, profile: 4 };
+  const navItems = document.querySelectorAll('.nav-item');
+  if (navMap[name] !== undefined) {
+    navItems[navMap[name]].classList.add('active');
+    navItems[navMap[name]].setAttribute('aria-current', 'page');
+  }
+  const titles = { dashboard: 'Dashboard', groups: 'Find Groups', chat: 'Group Chat', calendar: 'Calendar', profile: 'Profile & Settings' };
+  document.getElementById('topbar-title').textContent = titles[name] || 'StudySync';
+  // Remove aria-current from others
+  navItems.forEach((ni, i) => { if (i !== navMap[name]) ni.removeAttribute('aria-current'); });
+  window.scrollTo(0,0);
+}
+
+// ======================================================
+// POMODORO
+// ======================================================
+function togglePomodoro() {
+  if (pomodoroRunning) {
+    clearInterval(pomodoroInterval);
+    pomodoroRunning = false;
+    const btn = document.getElementById('pomo-start-btn');
+    btn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i> Resume';
+    document.getElementById('pomo-label').textContent = 'Paused';
+  } else {
+    pomodoroRunning = true;
+    const btn = document.getElementById('pomo-start-btn');
+    btn.innerHTML = '<i class="fa-solid fa-pause" aria-hidden="true"></i> Pause';
+    document.getElementById('pomo-label').textContent = 'Focus time! 🎯';
+    pomodoroInterval = setInterval(() => {
+      pomodoroSeconds--;
+      if (pomodoroSeconds <= 0) {
+        clearInterval(pomodoroInterval);
+        pomodoroRunning = false;
+        pomodoroSeconds = 0;
+        updatePomodoroDisplay();
+        document.getElementById('pomo-label').textContent = 'Session complete! 🎉';
+        document.getElementById('pomo-phase').textContent = 'Done';
+        btn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i> Start';
+        showToast('Pomodoro complete! Time for a break 🎉', 'success');
+        fireConfetti();
+        openModal('session-complete-modal');
+      }
+      updatePomodoroDisplay();
+    }, 1000);
+  }
+}
+
+function resetPomodoro() {
+  clearInterval(pomodoroInterval);
+  pomodoroRunning = false;
+  pomodoroSeconds = pomodoroSettings.focus * 60;
+  pomodoroTotal = pomodoroSettings.focus * 60;
+  updatePomodoroDisplay();
+  document.getElementById('pomo-label').textContent = 'Ready to focus?';
+  document.getElementById('pomo-phase').textContent = 'Focus';
+  const btn = document.getElementById('pomo-start-btn');
+  if (btn) btn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i> Start';
+  document.getElementById('pomo-bar').style.width = '0%';
+}
+
+function updatePomodoroDisplay() {
+  const m = Math.floor(pomodoroSeconds / 60).toString().padStart(2, '0');
+  const s = (pomodoroSeconds % 60).toString().padStart(2, '0');
+  const display = document.getElementById('pomo-display');
+  if (display) {
+    display.textContent = m + ':' + s;
+    display.setAttribute('aria-label', m + ' minutes ' + s + ' seconds');
+  }
+  const pct = ((pomodoroTotal - pomodoroSeconds) / pomodoroTotal) * 100;
+  const bar = document.getElementById('pomo-bar');
+  if (bar) {
+    bar.style.width = pct + '%';
+    bar.closest('[role="progressbar"]').setAttribute('aria-valuenow', Math.round(pct));
+  }
+}
+
+function startPomodoroFromGroup() {
+  showSubPage('dashboard');
+  setTimeout(() => {
+    if (!pomodoroRunning) togglePomodoro();
+    showToast('Pomodoro started with your group! 🍅', 'success');
+  }, 100);
+}
+
+function savePomodoroSettings() {
+  pomodoroSettings.focus = parseInt(document.getElementById('ps-focus').value) || 25;
+  pomodoroSettings.shortBreak = parseInt(document.getElementById('ps-break').value) || 5;
+  pomodoroSettings.longBreak = parseInt(document.getElementById('ps-long').value) || 15;
+  resetPomodoro();
+  closeModal('pomo-settings-modal');
+  showToast('Pomodoro settings saved!', 'success');
+}
+
+// ======================================================
+// TASKS
+// ======================================================
+function updateTaskCount(checkbox) {
+  const span = checkbox.nextElementSibling;
+  span.classList.toggle('done', checkbox.checked);
+  taskDone = document.querySelectorAll('#task-list input[type=checkbox]:checked').length;
+  taskTotal = document.querySelectorAll('#task-list .task-item').length;
+  document.getElementById('task-count').textContent = taskDone + '/' + taskTotal;
+  if (checkbox.checked) showToast('Task completed! Great work 💪', 'success');
+}
+
+function addTask() {
+  const input = document.getElementById('task-input');
+  const text = input.value.trim();
+  if (!text) { showToast('Please enter a task name first!', 'error'); return; }
+  const list = document.getElementById('task-list');
+  const item = document.createElement('div');
+  item.className = 'task-item';
+  item.setAttribute('role', 'listitem');
+  item.setAttribute('draggable', 'true');
+  item.innerHTML = `
+    <input type="checkbox" onchange="updateTaskCount(this)" aria-label="Task: ${text}">
+    <span class="task-text">${text}</span>
+    <span class="task-assignee" aria-label="Assigned to you">You</span>
+    <button class="task-react" onclick="reactTask(this)" aria-label="React with emoji">⭐</button>
+  `;
+  list.appendChild(item);
+  input.value = '';
+  taskTotal++;
+  document.getElementById('task-count').textContent = taskDone + '/' + taskTotal;
+  showToast('Task added!', 'success');
+}
+
+function reactTask(btn) {
+  const emojis = ['⭐','🔥','💪','🎉','✅','💡'];
+  const current = emojis.indexOf(btn.textContent);
+  btn.textContent = emojis[(current + 1) % emojis.length];
+}
+
+// ======================================================
+// CHAT
+// ======================================================
+function switchRoom(el, name) {
+  document.querySelectorAll('.chat-room-item').forEach(r => r.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('chat-room-title').textContent = name;
+}
+
+function insertEmoji(emoji) {
+  const input = document.getElementById('chat-input');
+  input.value += emoji;
+  input.focus();
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chat-messages');
+  const userName = currentUser ? currentUser.name.split(' ')[0] : 'You';
+  const initial = currentUser ? currentUser.name[0] : 'Y';
+  let processedText = text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble mine';
+  bubble.innerHTML = `
+    <div class="avatar" style="width:32px;height:32px;font-size:0.7rem;background:linear-gradient(135deg,#1976D2,#0D47A1)" aria-hidden="true">${initial}</div>
+    <div>
+      <div class="bubble-author">${userName}</div>
+      <div class="bubble-content">${processedText}</div>
+    </div>
+  `;
+  msgs.appendChild(bubble);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+}
+
+function sendShoutout() {
+  const member = document.getElementById('so-member').value;
+  const msg = document.getElementById('so-msg').value.trim();
+  if (!msg) { showToast('Please write something nice! 💚', 'error'); return; }
+  closeModal('shoutout-modal');
+  const msgs = document.getElementById('chat-messages');
+  const bubble = document.createElement('div');
+  bubble.className = 'shoutout-bubble';
+  bubble.setAttribute('role', 'note');
+  bubble.innerHTML = `<div class="so-title">🎉 Shout-Out!</div><div>${currentUser.name.split(' ')[0]} says: <strong>${member}</strong> – ${msg} 🙌</div>`;
+  msgs.appendChild(bubble);
+  msgs.scrollTop = msgs.scrollHeight;
+  showSubPage('chat');
+  showToast('Shout-out sent! ' + member + ' will love that 💚', 'success');
+  document.getElementById('so-msg').value = '';
+}
+
+// ======================================================
+// GROUPS
+// ======================================================
+function renderGroups(groups) {
+  const grid = document.getElementById('groups-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  groups.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'group-card';
+    card.setAttribute('role', 'listitem');
+    const avatars = g.colors.slice(0, 4).map((c, i) => `<div class="avatar" style="width:26px;height:26px;font-size:0.65rem;background:${c}" aria-hidden="true">${String.fromCharCode(65+i)}</div>`).join('');
+    card.innerHTML = `
+      <div class="group-card-top">
+        <div class="group-name">${g.name}</div>
+        <div class="match-badge" aria-label="${g.match}% match">${g.match}% match</div>
+      </div>
+      <div class="group-meta">
+        <span class="tag"><i class="fa-solid fa-book" aria-hidden="true"></i> ${g.course}</span>
+        <span class="tag"><i class="fa-solid fa-brain" aria-hidden="true"></i> ${g.method}</span>
+        <span class="tag"><i class="fa-solid fa-repeat" aria-hidden="true"></i> ${g.freq}</span>
+      </div>
+      <div class="group-members">
+        <div class="avatar-stack" aria-hidden="true">${avatars}</div>
+        <span aria-label="${g.members} of ${g.max} members">${g.members}/${g.max} members</span>
+      </div>
+      <button class="btn btn-primary btn-sm btn-full" onclick="joinGroup('${g.name}')" aria-label="Join ${g.name} study group">
+        <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Join Group
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterGroups() {
+  const spinner = document.getElementById('groups-spinner');
+  spinner.style.display = 'block';
+  setTimeout(() => {
+    spinner.style.display = 'none';
+    showToast('Groups filtered!', 'info');
+  }, 600);
+}
+
+function joinGroup(name) {
+  showToast('🎉 You\'ve been matched with ' + name + '! Check your dashboard.', 'success');
+  setTimeout(() => fireConfetti(), 300);
+}
+
+function createGroup() {
+  const name = document.getElementById('cg-name').value.trim();
+  if (!name) { showToast('Please enter a group name!', 'error'); return; }
+  closeModal('create-group-modal');
+  showToast('Group "' + name + '" created! Invite your friends 🎉', 'success');
+  setTimeout(() => fireConfetti(), 300);
+  document.getElementById('cg-name').value = '';
+}
+
+// ======================================================
+// CALENDAR
+// ======================================================
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const hours = Array.from({length: 15}, (_, i) => i + 8); // 8am-10pm
+
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  // Header row
+  const emptyHead = document.createElement('div');
+  emptyHead.className = 'cal-day-head';
+  emptyHead.setAttribute('aria-hidden', 'true');
+  grid.appendChild(emptyHead);
+  const baseDate = new Date(2025, 4, 19 + calendarWeekOffset * 7);
+  days.forEach((d, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day-head';
+    cell.setAttribute('scope', 'col');
+    const dt = new Date(baseDate);
+    dt.setDate(dt.getDate() + i);
+    cell.textContent = d + ' ' + dt.getDate();
+    grid.appendChild(cell);
+  });
+  // Update week label
+  const endDate = new Date(baseDate);
+  endDate.setDate(endDate.getDate() + 6);
+  document.getElementById('cal-week-label').textContent = `Week of ${baseDate.getDate()} ${baseDate.toLocaleString('default',{month:'short'})} ${baseDate.getFullYear()}`;
+  // Time rows
+  hours.forEach(h => {
+    const lbl = document.createElement('div');
+    lbl.className = 'cal-time-label';
+    lbl.textContent = h > 12 ? (h-12) + 'pm' : (h === 12 ? '12pm' : h + 'am');
+    lbl.setAttribute('aria-hidden', 'true');
+    grid.appendChild(lbl);
+    days.forEach((_, di) => {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell';
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('tabindex', '0');
+      cell.setAttribute('aria-label', `${days[di]} at ${h > 12 ? (h-12) + 'pm' : h + 'am'} - add event`);
+      cell.onclick = () => quickAddSession(di, h);
+      cell.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); quickAddSession(di, h); } };
+      // Check for events
+      const event = calendarEvents.find(ev => ev.day === di && ev.hour === h);
+      if (event) {
+        const evEl = document.createElement('div');
+        evEl.className = 'cal-event ' + (event.type || '');
+        evEl.textContent = event.label;
+        evEl.title = event.label;
+        evEl.setAttribute('aria-label', `${event.label} session`);
+        cell.appendChild(evEl);
+      }
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function changeWeek(dir) {
+  calendarWeekOffset += dir;
+  renderCalendar();
+}
+
+function quickAddSession(day, hour) {
+  document.getElementById('create-session-modal').classList.add('open');
+  // Pre-fill time
+  const timeVal = hour.toString().padStart(2,'0') + ':00';
+  const sel = document.getElementById('cs-time');
+  if (sel) { for (let o of sel.options) { if (o.value === timeVal) { o.selected = true; break; } } }
+}
+
+function populateTimeSlots() {
+  const sel = document.getElementById('cs-time');
+  if (!sel) return;
+  sel.innerHTML = '';
+  for (let h = 7; h <= 22; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const hh = h.toString().padStart(2,'0');
+      const mm = m.toString().padStart(2,'0');
+      const ampm = h >= 12 ? 'pm' : 'am';
+      const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      const opt = document.createElement('option');
+      opt.value = hh + ':' + mm;
+      opt.textContent = h12 + ':' + mm + ' ' + ampm;
+      sel.appendChild(opt);
+    }
+  }
+}
+
+function createCalendarSession() {
+  const name = document.getElementById('cs-name').value.trim();
+  const date = document.getElementById('cs-date').value;
+  const time = document.getElementById('cs-time').value;
+  const type = document.getElementById('cs-type').value;
+  if (!name) { showToast('Please enter a session name!', 'error'); return; }
+  // Add to calendar
+  if (time) {
+    const hour = parseInt(time.split(':')[0]);
+    calendarEvents.push({ day: new Date().getDay() - 1 || 0, hour, label: name, type });
+  }
+  closeModal('create-session-modal');
+  renderCalendar();
+  showToast('Session "' + name + '" scheduled! 📅', 'success');
+  document.getElementById('cs-name').value = '';
+}
+
+// ======================================================
+// PROFILE
+// ======================================================
+function toggleDarkMode(checkbox) {
+  if (checkbox.checked) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('ss_dark', 'true');
+    showToast('Dark mode enabled 🌙', 'info');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ss_dark', 'false');
+    showToast('Light mode enabled ☀️', 'info');
+  }
+}
+
+function toggleDND(checkbox) {
+  const banner = document.getElementById('dnd-status');
+  if (checkbox.checked) {
+    banner.classList.add('show');
+    showToast('Do Not Disturb is ON. No notifications will be sent.', 'warning');
+  } else {
+    banner.classList.remove('show');
+    showToast('Do Not Disturb turned off.', 'info');
+  }
+}
+
+function saveProfile() {
+  const name = document.getElementById('ep-name').value.trim();
+  const course = document.getElementById('ep-course').value.trim();
+  if (!name) { showToast('Name cannot be empty!', 'error'); return; }
+  currentUser.name = name;
+  currentUser.course = course;
+  localStorage.setItem('ss_user', JSON.stringify(currentUser));
+  document.getElementById('profile-name-display').textContent = name;
+  document.getElementById('sidebar-name').textContent = name;
+  document.getElementById('welcome-name').textContent = name.split(' ')[0];
+  document.getElementById('sidebar-avatar').textContent = name[0];
+  document.getElementById('profile-avatar').textContent = name[0];
+  closeModal('edit-profile-modal');
+  showToast('Profile updated successfully!', 'success');
+}
+
+function confirmDeleteAccount() {
+  const confirm = document.getElementById('da-confirm').value.trim();
+  if (confirm !== 'DELETE') { showToast('Type DELETE (in caps) to confirm.', 'error'); return; }
+  closeModal('delete-account-modal');
+  localStorage.clear();
+  showToast('Account deleted. Goodbye! We\'ll miss you 💙', 'warning');
+  setTimeout(() => { currentUser = null; showPage('page-auth'); }, 2000);
+}
+
+function toggleLeaderboard(checkbox) {
+  const lb = document.getElementById('leaderboard');
+  lb.classList.toggle('show', checkbox.checked);
+}
+
+// ======================================================
+// MODALS
+// ======================================================
+function openModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  // Focus first focusable element
+  setTimeout(() => {
+    const focusable = modal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (focusable) focusable.focus();
+  }, 100);
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  }
+});
+
+// ======================================================
+// STUDYBOT
+// ======================================================
+function sendBotMessage() {
+  const input = document.getElementById('studybot-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('studybot-msgs');
+  const userMsg = document.createElement('div');
+  userMsg.className = 'user-msg';
+  userMsg.textContent = text;
+  msgs.appendChild(userMsg);
+  input.value = '';
+
+  setTimeout(() => {
+    const lower = text.toLowerCase();
+    let reply = 'Hmm, I\'m not sure about that one! Try asking about: joining groups, Pomodoro, streaks, badges, scheduling sessions, shout-outs, or dark mode 😊';
+    for (const faq of botFAQ) {
+      if (faq.q.some(kw => lower.includes(kw))) {
+        reply = faq.a.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        break;
+      }
+    }
+    const botMsg = document.createElement('div');
+    botMsg.className = 'bot-msg';
+    botMsg.innerHTML = reply;
+    msgs.appendChild(botMsg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 500);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ======================================================
+// TOASTS
+// ======================================================
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}" aria-hidden="true"></i> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.4s, transform 0.4s';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+// ======================================================
+// CONFETTI
+// ======================================================
+function fireConfetti() {
+  try {
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#2E7D32','#1976D2','#F9A825','#E65100','#ffffff'] });
+  } catch(e) {}
+}
+
+// ======================================================
+// KEYBOARD NAV
+// ======================================================
+document.querySelectorAll('.chat-room-item').forEach(item => {
+  item.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.click(); }
+  });
+});
+
+// ======================================================
+// INIT ON LOAD
+// ======================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // Check for saved session
+  const saved = localStorage.getItem('ss_user');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showPage('page-app');
+    initApp();
+  }
+  // Set today's date as default for session creation
+  const today = new Date().toISOString().split('T')[0];
+  const csDate = document.getElementById('cs-date');
+  if (csDate) csDate.value = today;
+});
+</script>
+</body>
+</html>
